@@ -1,3 +1,41 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* /////////////////////////////////////////////////////////// */
+html {
+	--font-base: 100%;
+	font-size: var(--font-base);
+	scroll-behavior: smooth;
+}
+
+@media (max-width: 1446px) {
+	html {
+		font-size: calc(var(--font-base) - 12.25%);
+	}
+}
+
+@media (max-width: 980px) {
+	html {
+		font-size: calc(var(--font-base) - 12.5%);
+	}
+}
+
+@media (max-width: 340px) {
+	html {
+		font-size: calc(var(--font-base) - 30%);
+	}
+}
+
+/* /////////////////////////////////////////////////////////// */
+*::-webkit-scrollbar {
+  width: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #262626;
+}
+
+*::-webkit-scrollbar-track {
+  background: #121214;
+}
