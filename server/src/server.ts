@@ -1,7 +1,20 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import cors from 'cors';
+
+import { convertHourStringToMinutes } from './utils/convert-hour-string-to-minutes';
+import { convertMinutesToHourString } from './utils/convert-minutes-to-hour-string';
+
 
 const app = express()
+
+app.use(express.json())
+app.use(cors())
+
+// app.use(cors({
+//   origin: 'https://esportsmeet.vercel.app/'
+// }))
+
 const prisma = new PrismaClient()
 
 
@@ -43,7 +56,9 @@ app.get('/games/:id/ads', async (req, res) => {
   return res.json(ads.map(ad => {
     return {
       ...ad,
-      weekDays: ad.weekDays.split(',')
+      weekDays: ad.weekDays.split(','),
+      hourStart: convertMinutesToHourString(ad.hourStart),
+      hourEnd: convertMinutesToHourString(ad.hourEnd)
     }
   }))
 })
@@ -65,8 +80,27 @@ app.get('/ads/:id/discord', async (req, res) => {
   })
 })
 
-app.post('/ads', (req, res) => {
-  return res.status(201).json([])
+app.post('/games/:id/ads', async (req, res) => {
+  const gameId = req.params.id
+  const body = req.body
+
+  // Validaçao zod js
+
+  const ad = await prisma.ad.create({
+    data: {
+      gameId,
+      id: body.id,
+      name: body.name, 
+      yearsPlaying: body.yearsPlaying, 
+      discord: body.discord, 
+      weekDays: body.weekDays.join(','), 
+      hourStart: convertHourStringToMinutes(body.hourStart), 
+      hourEnd: convertHourStringToMinutes(body.hourEnd), 
+      useVoiceChannel: body.useVoiceChannel
+    }    
+  })
+
+  return res.status(201).json(ad)
 })
 
 app.listen(3333)
