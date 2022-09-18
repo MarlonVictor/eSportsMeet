@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import axios from "axios";
 
 import { GameBanner } from "./components/GameBanner";
 import { CreateAdBanner } from "./components/CreateAdBanner";
+import { CreateAdModal } from "./components/CreateAdModal";
 
 import logoImg from "./assets/logo-esports.svg";
 
 import "./styles/main.css";
-
-import { CreateAdModal } from "./components/CreateAdModal";
 
 
 interface IGame {
@@ -24,9 +24,7 @@ function App() {
   const [games, setGames] = useState<IGame[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:3333/games')
-      .then(res => res.json())
-      .then(data => setGames(data))
+    axios('http://localhost:3333/games').then(res => setGames(res.data))      
   }, [])
 
   return (

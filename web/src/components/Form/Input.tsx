@@ -6,6 +6,7 @@ export function Input(props: InputProps) {
   return (
     <input 
       {...props}
+      name={props.id}
       className="bg-gray-900 py-3 px-4 rounded text-sm placeholder:text-gray-500"
     />
   )

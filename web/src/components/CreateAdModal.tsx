@@ -1,10 +1,11 @@
+import { FormEvent, useEffect, useState } from "react";
 import { Check, GameController } from "phosphor-react";
+import axios from "axios";
 import * as Dialog from "@radix-ui/react-dialog";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 
 import { Input } from "./Form/Input";
-import { useEffect, useState } from "react";
 
 
 interface IGame {
@@ -15,12 +16,37 @@ interface IGame {
 export function CreateAdModal() {
   const [games, setGames] = useState<IGame[]>([])
   const [weekDays, setWeekDays] = useState<string[]>([])
+  const [useVoiceChannel, setUseVoiceChannel] = useState(false)
 
   useEffect(() => {
-    fetch('http://localhost:3333/games')
-      .then(res => res.json())
-      .then(data => setGames(data))
+    axios('http://localhost:3333/games').then(res => setGames(res.data))      
   }, [])
+
+  async function handleCreateAd(ev: FormEvent) {
+    ev.preventDefault()
+
+    const formData = new FormData(ev.target as HTMLFormElement)
+    const data = Object.fromEntries(formData)
+
+    if (!data.name) return
+
+    try {
+      await axios.post(`http://localhost:3333/games/${data.game}/ads`, {
+        name: data.name,
+        yearsPlaying: Number(data.yearsPlaying),
+        discord: data.discord,
+        weekDays: weekDays.map(Number),
+        hourStart: data.hourStart,
+        hourEnd: data.hourEnd,
+        useVoiceChannel: useVoiceChannel
+      })
+
+      console.log('Anuncio cadastrado com sucesso');
+
+    } catch(error: any) {
+      alert(error.message)
+    }
+  }
 
   return (
     <Dialog.Portal>
@@ -29,10 +55,10 @@ export function CreateAdModal() {
       <Dialog.Content className="fixed bg-gray-800 py-8 px-10 text-white top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-lg w-[38rem] shadow-xl">
         <Dialog.Title className="text-3xl font-black">Publique um anúncio</Dialog.Title>
 
-        <form action="" className="mt-8 flex flex-col gap-4">
+        <form onSubmit={handleCreateAd} className="mt-8 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label htmlFor="game" className="font-semibold">Qual o game?</label>
-            <select id="game" className="bg-gray-900 py-3 px-4 rounded text-sm appearance-none" defaultValue="">
+            <select id="game" name="game" className="bg-gray-900 py-3 px-4 rounded text-sm appearance-none" defaultValue="">
               <option value="" disabled>Selecione o game que deseja jogar</option>
 
               {games.map(game => <option key={game.id} value={game.id}>{game.title}</option>)}
@@ -96,7 +122,11 @@ export function CreateAdModal() {
           </div>
 
           <label className="mt-2 flex items-center gap-2 text-sm">
-            <Checkbox.Root className="w-6 h-6 p-1 bg-gray-900">
+            <Checkbox.Root 
+              className="w-6 h-6 p-1 bg-gray-900" 
+              checked={useVoiceChannel}
+              onCheckedChange={(checked) => checked ? setUseVoiceChannel(true) : setUseVoiceChannel(false)}
+            >
               <Checkbox.Indicator>
                 <Check className="w-4 h-4 text-emerald-400" />
               </Checkbox.Indicator>
