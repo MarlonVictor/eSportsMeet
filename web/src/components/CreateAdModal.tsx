@@ -1,11 +1,13 @@
 import { FormEvent, useEffect, useState } from "react";
-import { Check, GameController } from "phosphor-react";
+import { GameController } from "phosphor-react";
 import axios from "axios";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as Checkbox from "@radix-ui/react-checkbox";
+
 import * as ToggleGroup from "@radix-ui/react-toggle-group";
 
 import { Input } from "./Form/Input";
+import { Select } from "./Form/Select";
+import { Checkbox } from "./Form/Checkbox";
 
 
 interface IGame {
@@ -16,6 +18,7 @@ interface IGame {
 export function CreateAdModal() {
   const [games, setGames] = useState<IGame[]>([])
   const [weekDays, setWeekDays] = useState<string[]>([])
+  const [gameSelected, setGameSelected] = useState('')
   const [useVoiceChannel, setUseVoiceChannel] = useState(false)
 
   useEffect(() => {
@@ -29,9 +32,9 @@ export function CreateAdModal() {
     const data = Object.fromEntries(formData)
 
     if (!data.name) return
-
+    
     try {
-      await axios.post(`http://localhost:3333/games/${data.game}/ads`, {
+      await axios.post(`http://localhost:3333/games/${gameSelected}/ads`, {
         name: data.name,
         yearsPlaying: Number(data.yearsPlaying),
         discord: data.discord,
@@ -58,11 +61,12 @@ export function CreateAdModal() {
         <form onSubmit={handleCreateAd} className="mt-8 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <label htmlFor="game" className="font-semibold">Qual o game?</label>
-            <select id="game" name="game" className="bg-gray-900 py-3 px-4 rounded text-sm appearance-none" defaultValue="">
-              <option value="" disabled>Selecione o game que deseja jogar</option>
-
-              {games.map(game => <option key={game.id} value={game.id}>{game.title}</option>)}
-            </select>
+            <Select 
+              title="Games"
+              placeholder="Selecione um game…"
+              itens={games}
+              setValue={setGameSelected}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -122,16 +126,11 @@ export function CreateAdModal() {
           </div>
 
           <label className="mt-2 flex items-center gap-2 text-sm">
-            <Checkbox.Root 
-              className="w-6 h-6 p-1 bg-gray-900" 
-              checked={useVoiceChannel}
-              onCheckedChange={(checked) => checked ? setUseVoiceChannel(true) : setUseVoiceChannel(false)}
-            >
-              <Checkbox.Indicator>
-                <Check className="w-4 h-4 text-emerald-400" />
-              </Checkbox.Indicator>
-            </Checkbox.Root>
-            Costumo me conectar ao chat de voz
+            <Checkbox 
+              title="Costumo me conectar ao chat de voz"
+              initialValue={useVoiceChannel}
+              setValue={setUseVoiceChannel}
+            />
           </label>
 
           <footer className="mt-4 flex justify-end gap-4">
